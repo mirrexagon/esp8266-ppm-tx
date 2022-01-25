@@ -76,82 +76,82 @@ static bool gpio_level = 0;
 // Abstraction to avoid writing to the GPIO registers unecessarily.
 static inline void set_gpio_level(bool level)
 {
-	if (gpio_level != level)
-	{
-		gpio_level = level;
-		GPIO_OUTPUT_SET(PPM_GPIO, level ? PPM_HIGH : PPM_LOW);
-	}
+    if (gpio_level != level)
+    {
+        gpio_level = level;
+        GPIO_OUTPUT_SET(PPM_GPIO, level ? PPM_HIGH : PPM_LOW);
+    }
 }
 
 // ---
 
 static inline void update_channels(void)
 {
-	for (int i = 0; i < N_CHANNELS; ++i)
-	{
-		_channels_us[i] = UINT16_TO_CHANNEL_US(channels[i]);
-	}
+    for (int i = 0; i < N_CHANNELS; ++i)
+    {
+        _channels_us[i] = UINT16_TO_CHANNEL_US(channels[i]);
+    }
 
-	_channels_us[N_CHANNELS] = FRAME_GAP_US;
+    _channels_us[N_CHANNELS] = FRAME_GAP_US;
 }
 
 // ---
 
 void hw_timer_callback(void)
 {
-	if (failsafe_timer >= FAILSAFE_TIMEOUT_US)
-	{
-		// Failsafe!
-		set_gpio_level(false);
+    if (failsafe_timer >= FAILSAFE_TIMEOUT_US)
+    {
+        // Failsafe!
+        set_gpio_level(false);
 
-		current_channel = 0;
-		channel_timer = 0;
+        current_channel = 0;
+        channel_timer = 0;
 
-		return;
-	}
+        return;
+    }
 
-	// ---
+    // ---
 
-	// Each channel has a 0.3ms pulse, followed by 0.7-1.7 ms.
-	// The final channel is followed by another 0.3ms pulse, then the frame gap.
-	// We can think of the frame gap as just a really long channel.
+    // Each channel has a 0.3ms pulse, followed by 0.7-1.7 ms.
+    // The final channel is followed by another 0.3ms pulse, then the frame gap.
+    // We can think of the frame gap as just a really long channel.
 
-	// FIXME: Sometimes channel one is a few timer cycles too long.
-	// I don't know why.
+    // FIXME: Sometimes channel one is a few timer cycles too long.
+    // I don't know why.
 
-	if (channel_timer < PULSE_US) // Start-of-channel pulse.
-	{
-		set_gpio_level(true);
-	}
-	else
-	{
-		if (channel_timer < _channels_us[current_channel])
-		{
-			// Waiting in channel or frame gap low.
-			set_gpio_level(false);
-		}
-		else // Next channel (or new frame)!
-		{
-			// Begin the pulse immediately.
-			set_gpio_level(true);
+    if (channel_timer < PULSE_US) // Start-of-channel pulse.
+    {
+        set_gpio_level(true);
+    }
+    else
+    {
+        if (channel_timer < _channels_us[current_channel])
+        {
+            // Waiting in channel or frame gap low.
+            set_gpio_level(false);
+        }
+        else // Next channel (or new frame)!
+        {
+            // Begin the pulse immediately.
+            set_gpio_level(true);
 
-			if (current_channel != N_CHANNELS) // Normal channel.
-			{
-				current_channel += 1;
-				channel_timer = 0;
-			}
-			else // Frame gap.
-			{
-				current_channel = 0;
-				channel_timer = 0;
+            if (current_channel != N_CHANNELS) // Normal channel.
+            {
+                current_channel += 1;
+                channel_timer = 0;
+            }
+            else // Frame gap.
+            {
+                current_channel = 0;
+                channel_timer = 0;
 
-				update_channels();
-			}
-		}
-	}
+                update_channels();
+            }
+        }
+    }
 
-	failsafe_timer += PPM_RESOLUTION_US;
-	channel_timer += PPM_RESOLUTION_US;
+    failsafe_timer += PPM_RESOLUTION_US;
+    channel_timer += PPM_RESOLUTION_US;
 }
 // --- ==== --- //
 
@@ -159,38 +159,38 @@ void hw_timer_callback(void)
 // --- Public interface --- //
 void ICACHE_FLASH_ATTR ppm_init(void)
 {
-	PIN_FUNC_SELECT(PERIPHS_IO_MUX_GPIO2_U, FUNC_GPIO2);
-	gpio_output_set(0, 0, (1 << PPM_GPIO), 0);
+    PIN_FUNC_SELECT(PERIPHS_IO_MUX_GPIO2_U, FUNC_GPIO2);
+    gpio_output_set(0, 0, (1 << PPM_GPIO), 0);
 
-	update_channels();
+    update_channels();
 
-	hw_timer_init(FRC1_SOURCE, 1);
-	hw_timer_set_func(hw_timer_callback);
-	hw_timer_arm(PPM_RESOLUTION_US);
+    hw_timer_init(FRC1_SOURCE, 1);
+    hw_timer_set_func(hw_timer_callback);
+    hw_timer_arm(PPM_RESOLUTION_US);
 }
 
 bool ppm_get_failsafe(void)
 {
-	return (failsafe_timer >= FAILSAFE_TIMEOUT_US);
+    return (failsafe_timer >= FAILSAFE_TIMEOUT_US);
 }
 
 void ppm_reset_failsafe(void)
 {
-	failsafe_timer = 0;
+    failsafe_timer = 0;
 }
 
 void ppm_force_failsafe(void)
 {
-	failsafe_timer = FAILSAFE_TIMEOUT_US;
+    failsafe_timer = FAILSAFE_TIMEOUT_US;
 }
 
 uint16_t ppm_get_channel(int channel)
 {
-	return channels[channel];
+    return channels[channel];
 }
 
 void ppm_set_channel(int channel, uint16_t value)
 {
-	channels[channel] = value;
+    channels[channel] = value;
 }
 // --- ==== --- //

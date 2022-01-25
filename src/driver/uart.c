@@ -71,10 +71,10 @@ uart_config(uint8 uart_no)
         ETS_UART_INTR_ATTACH(uart0_rx_intr_handler,  &(UartDev.rcv_buff));
         PIN_PULLUP_DIS(PERIPHS_IO_MUX_U0TXD_U);
         PIN_FUNC_SELECT(PERIPHS_IO_MUX_U0TXD_U, FUNC_U0TXD);
-	#if UART_HW_RTS
+    #if UART_HW_RTS
         PIN_FUNC_SELECT(PERIPHS_IO_MUX_MTDO_U, FUNC_U0RTS);   //HW FLOW CONTROL RTS PIN
         #endif
-	#if UART_HW_CTS
+    #if UART_HW_CTS
         PIN_FUNC_SELECT(PERIPHS_IO_MUX_MTCK_U, FUNC_U0CTS);   //HW FLOW CONTROL CTS PIN
         #endif
     }
@@ -233,10 +233,10 @@ uart0_rx_intr_handler(void *para)
     uint8 temp,cnt;
     //RcvMsgBuff *pRxBuff = (RcvMsgBuff *)para;
     
-    	/*ATTENTION:*/
-	/*IN NON-OS VERSION SDK, DO NOT USE "ICACHE_FLASH_ATTR" FUNCTIONS IN THE WHOLE HANDLER PROCESS*/
-	/*ALL THE FUNCTIONS CALLED IN INTERRUPT HANDLER MUST BE DECLARED IN RAM */
-	/*IF NOT , POST AN EVENT AND PROCESS IN SYSTEM TASK */
+        /*ATTENTION:*/
+    /*IN NON-OS VERSION SDK, DO NOT USE "ICACHE_FLASH_ATTR" FUNCTIONS IN THE WHOLE HANDLER PROCESS*/
+    /*ALL THE FUNCTIONS CALLED IN INTERRUPT HANDLER MUST BE DECLARED IN RAM */
+    /*IF NOT , POST AN EVENT AND PROCESS IN SYSTEM TASK */
     if(UART_FRM_ERR_INT_ST == (READ_PERI_REG(UART_INT_ST(uart_no)) & UART_FRM_ERR_INT_ST)){
         DBG1("FRM_ERR\r\n");
         WRITE_PERI_REG(UART_INT_CLR(uart_no), UART_FRM_ERR_INT_CLR);
@@ -252,15 +252,15 @@ uart0_rx_intr_handler(void *para)
         system_os_post(uart_recvTaskPrio, 0, 0);
     }else if(UART_TXFIFO_EMPTY_INT_ST == (READ_PERI_REG(UART_INT_ST(uart_no)) & UART_TXFIFO_EMPTY_INT_ST)){
         DBG("e");
-	/* to output uart data from uart buffer directly in empty interrupt handler*/
-	/*instead of processing in system event, in order not to wait for current task/function to quit */
-	/*ATTENTION:*/
-	/*IN NON-OS VERSION SDK, DO NOT USE "ICACHE_FLASH_ATTR" FUNCTIONS IN THE WHOLE HANDLER PROCESS*/
-	/*ALL THE FUNCTIONS CALLED IN INTERRUPT HANDLER MUST BE DECLARED IN RAM */
-	CLEAR_PERI_REG_MASK(UART_INT_ENA(UART0), UART_TXFIFO_EMPTY_INT_ENA);
-	#if UART_BUFF_EN
-		tx_start_uart_buffer(UART0);
-	#endif
+    /* to output uart data from uart buffer directly in empty interrupt handler*/
+    /*instead of processing in system event, in order not to wait for current task/function to quit */
+    /*ATTENTION:*/
+    /*IN NON-OS VERSION SDK, DO NOT USE "ICACHE_FLASH_ATTR" FUNCTIONS IN THE WHOLE HANDLER PROCESS*/
+    /*ALL THE FUNCTIONS CALLED IN INTERRUPT HANDLER MUST BE DECLARED IN RAM */
+    CLEAR_PERI_REG_MASK(UART_INT_ENA(UART0), UART_TXFIFO_EMPTY_INT_ENA);
+    #if UART_BUFF_EN
+        tx_start_uart_buffer(UART0);
+    #endif
         //system_os_post(uart_recvTaskPrio, 1, 0);
         WRITE_PERI_REG(UART_INT_CLR(uart_no), UART_TXFIFO_EMPTY_INT_CLR);
         
@@ -532,7 +532,7 @@ tx_buff_enq(char* pdata, uint16 data_len )
     }
     #if 0
     if(pTxBuffer->Space <= URAT_TX_LOWER_SIZE){
-	    set_tcp_block();        
+        set_tcp_block();        
     }
     #endif
     SET_PERI_REG_MASK(UART_CONF1(UART0), (UART_TX_EMPTY_THRESH_VAL & UART_TXFIFO_EMPTY_THRHD)<<UART_TXFIFO_EMPTY_THRHD_S);
@@ -678,11 +678,11 @@ UART_WaitTxFifoEmpty(uint8 uart_no , uint32 time_out_us) //do not use if tx flow
 {
     uint32 t_s = system_get_time();
     while (READ_PERI_REG(UART_STATUS(uart_no)) & (UART_TXFIFO_CNT << UART_TXFIFO_CNT_S)){
-		
+        
         if(( system_get_time() - t_s )> time_out_us){
             break;
         }
-	WRITE_PERI_REG(0X60000914, 0X73);//WTD
+    WRITE_PERI_REG(0X60000914, 0X73);//WTD
 
     }
 }
@@ -701,14 +701,14 @@ UART_CheckOutputFinished(uint8 uart_no, uint32 time_out_us)
         }else{
             tx_buff_len = 0;
         }
-		
+        
         if( tx_fifo_len==0 && tx_buff_len==0){
             return TRUE;
         }
         if( system_get_time() - t_start > time_out_us){
             return FALSE;
         }
-	WRITE_PERI_REG(0X60000914, 0X73);//WTD
+    WRITE_PERI_REG(0X60000914, 0X73);//WTD
     }    
 }
 
@@ -741,8 +741,8 @@ UART_SetPrintPort(uint8 uart_no)
     }else{
         /*option 1: do not wait if uart fifo is full,drop current character*/
         os_install_putc1(uart0_write_char_no_wait);
-	/*option 2: wait for a while if uart fifo is full*/
-	os_install_putc1(uart0_write_char);
+    /*option 2: wait for a while if uart fifo is full*/
+    os_install_putc1(uart0_write_char);
     }
 }
 
@@ -760,7 +760,7 @@ uart_init_2(UartBautRate uart0_br, UartBautRate uart1_br)
     UartDev.parity = EVEN_BITS;
     UartDev.stop_bits = ONE_STOP_BIT;
     UartDev.data_bits = EIGHT_BITS;
-	
+    
     uart_config(UART0);
     UartDev.baut_rate = uart1_br;
     uart_config(UART1);
