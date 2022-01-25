@@ -3,7 +3,7 @@ Use an ESP8266 module as a receiver for your drone!
 
 This firmware has two main features: UDP-to-PPM for remote control, and a serial bridge for telemetry.
 
-WARNING: It is quite possible that this firmware has fatal bugs in it! I can't guarantee the safety of whatever you use this on. Be careful!
+WARNING: This is not very good code and was just a fun exercise. This firmware will certainly have fatal bugs in it! I can't guarantee the safety of you and whatever you use this on. Be careful!
 
 
 ## Configuration
@@ -48,7 +48,7 @@ By default, the firmware listens on TCP port 5621. The connection is just a comp
 
 
 ## License
-Released into the public domain via CC0 (see `COPYING` for the license text) EXCEPT for: 
+Released into the public domain via CC0 (see `COPYING` for the license text) EXCEPT for:
 
 - Files in `src/driver`, these are from the Espressif NONOS SDK (although slightly modified).
 - `blank.bin` and `esp_init_data_default.bin`, also from the Espressif NONOS SDK.
